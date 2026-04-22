@@ -8,7 +8,7 @@ import os
 # -----------------------------
 # Get path relative to project root
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(SCRIPT_DIR, "../../dbt_project/fincra_dev.duckdb")
+DB_PATH = os.path.join(SCRIPT_DIR, "../database/fincra_dev.duckdb")
 SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/XXX/YYY/ZZZ"
 
 ALERT_POSITION = "position_limit_breach"
