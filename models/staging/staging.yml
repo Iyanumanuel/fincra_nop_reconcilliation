@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: stg_trade_blotter_raw
+    description: "Raw trade blotter ingestion with type normalization."
+    columns:
+      - name: trade_ref
+        tests:
+          - not_null
+
+  - name: stg_trade_blotter_deduped
+    description: "Deduplicated trade blotter using latest ingested_at per trade reference."
+    columns:
+      - name: trade_ref
+        tests:
+          - unique
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['confirmed', 'pending', 'reversed', null]
+
+  - name: int_confirmed_trades
+    description: "Intermediate model filtering only confirmed trades for downstream processing."
+    columns:
+      - name: status
+        tests:
+          - not_null:
+              config:
+                where: "status = 'confirmed'"
+
+  - name: mart_computed_nop
+    description: "Computed NOP with correct carry-forward logic."
+    columns:
+      - name: opening_position_usd
+        description: "Opening NOP for the day."
+      - name: closing_position_usd
+        description: "Closing NOP = opening + buys - sells."
+
+  - name: mart_nop_reconciliation
+    description: "Comparison of computed NOP vs snapshot NOP."
+    columns:
+      - name: divergence_usd
+        tests:
+          - not_null
