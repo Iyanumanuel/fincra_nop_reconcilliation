@@ -6,8 +6,8 @@
 This project implements a comprehensive **Net Open Position (NOP)** computation and reconciliation system, including:
 
 - ✅ Data cleaning & deduplication of trade records
-- ✅ Deterministic NOP computation by currency and day
-- ✅ Reconciliation against official snapshots with break classification
+- ✅ NOP computation by currency and day
+- ✅ Reconciliation against daily snapshots with break classification
 - ✅ Late-arrival trade impact analysis
 - ✅ Alerting system (position limits, carry forward breaks, stale positions)
 - ✅ Production-ready architecture for Google Cloud Platform
