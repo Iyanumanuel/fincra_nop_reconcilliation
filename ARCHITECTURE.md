@@ -8,7 +8,7 @@ This document outlines a production-ready, serverless architecture for real-time
 
 The system operates through a simple three-stage flow: trades enter through a managed event queue (Pub/Sub), are stored immutably in BigQuery, and are aggregated through SQL views for both real-time monitoring and end-of-day reconciliation. This design decouples data ingestion from processing, ensuring that no trade events are lost or processed out of order.
 
-![alt text](architecture.png)
+![alt text](Architecture.png)
 
 ## 1. Data Ingestion: Google Cloud Pub/Sub
 To guarantee the 60-second delivery target, the system uses Google Cloud Pub/Sub as a high-speed ingestion layer.
