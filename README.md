@@ -1,4 +1,4 @@
-# SDE Assignment — Iyannuloluwa Emmnauel
+# SDE Assignment - Iyannuloluwa Emmnauel
 
 
 ## 📋 Overview
@@ -6,10 +6,10 @@
 This project implements a comprehensive **Net Open Position (NOP)** computation and reconciliation system, including:
 
 - ✅ Data cleaning & deduplication of trade records
-- ✅ Deterministic NOP computation by currency and day
-- ✅ Reconciliation against official snapshots with break classification
+- ✅ NOP computation by currency and day
+- ✅ Reconciliation against daily snapshots with break classification
 - ✅ Late-arrival trade impact analysis
-- ✅ Alerting system (position limits, breaks, stale positions)
+- ✅ Alerting system (position limits, carry forward breaks, stale positions)
 - ✅ Production-ready architecture for Google Cloud Platform
 
 ---
@@ -17,16 +17,15 @@ This project implements a comprehensive **Net Open Position (NOP)** computation 
 ## 📂 Quick Navigation
 
 ### For Detailed Implementation Information
-👉 **See [docs/IMPLEMENTATION_GUIDE.md](docs/IMPLEMENTATION_GUIDE.md)** for comprehensive documentation
+👉 **See [IMPLEMENTATION_GUIDE](docs/IMPLEMENTATION_GUIDE.md)** for comprehensive documentation
 
 ### Key Sections in Implementation Guide:
-1. **[System Architecture Overview](docs/IMPLEMENTATION_GUIDE.md#system-architecture-overview)** — High-level data flow
-2. **[Data Cleaning & Ingestion](docs/IMPLEMENTATION_GUIDE.md#part-1-data-cleaning-and-ingestion)** — 6 data quality issues + fixes
-3. **[NOP Computation & Reconciliation](docs/IMPLEMENTATION_GUIDE.md#part-2-nop-computation-and-CarryForward-reconciliation)** — Core logic & models
-4. **[Real-Time Alerting System](docs/IMPLEMENTATION_GUIDE.md#part-3-nop-alerting-system)** — 3 alert types with examples
-5. **[Production Architecture](docs/IMPLEMENTATION_GUIDE.md#part-4--production-ready-architecture)** — GCP deployment guide
-6. **[Key Findings & Insights](docs/IMPLEMENTATION_GUIDE.md#key-findings--insights)** — Stale positions, breaks, late arrivals
-7. **[Deployment & Operations](docs/IMPLEMENTATION_GUIDE.md#deployment--operations)** — Runbooks & monitoring
+1. **[System Architecture Overview](docs/IMPLEMENTATION_GUIDE.md#system-architecture-overview)** - High-level data flow
+2. **[Data Cleaning & Ingestion](docs/IMPLEMENTATION_GUIDE.md#part-1-data-cleaning-and-ingestion)** - 6 data quality issues + fixes
+3. **[NOP Computation & Reconciliation](docs/IMPLEMENTATION_GUIDE.md#part-2-nop-computation-and-CarryForward-reconciliation)** - Core logic & models
+4. **[Real-Time Alerting System](docs/IMPLEMENTATION_GUIDE.md#part-3-nop-alerting-system)** - 3 alert types with examples
+5. **[Production Architecture](docs/IMPLEMENTATION_GUIDE.md#part-4-production-ready-architecture)** - GCP deployment guide
+6. **[Key Findings & Insights](docs/IMPLEMENTATION_GUIDE.md#key-findings-and-insights)** - Stale positions, breaks, late arrivals
 
 ---
 
@@ -100,9 +99,9 @@ See [IMPLEMENTATION_GUIDE - Data Cleaning and Ingestion](docs/IMPLEMENTATION_GUI
 
 The system generates 3 alert types:
 
-1. **Position Limit Breach** — Long > +2M USD or Short < -1.5M USD
-2. **Carry-Forward Break** — `opening[N] != closing[N-1]`
-3. **Stale Position** — 5+ consecutive business days with zero trades
+1. **Position Limit Breach** - Long > +2M USD or Short < -1.5M USD
+2. **Carry-Forward Break** - `opening[N] != closing[N-1]`
+3. **Stale Position** - 5+ consecutive business days with zero trades
 
 See [IMPLEMENTATION_GUIDE - NOP Alerting System](docs/IMPLEMENTATION_GUIDE.md#part-3-nop-alerting-system) for alert logic & examples.
 
@@ -112,20 +111,20 @@ See [IMPLEMENTATION_GUIDE - NOP Alerting System](docs/IMPLEMENTATION_GUIDE.md#pa
 ## 📊 Models Overview
 
 ### Staging Layer (Data Cleaning)
-- `stg_trade_blotter_raw` — Type casting & validation
-- `stg_trade_blotter_raw` — Type casting & validation
+- `stg_trade_blotter_raw` - Type casting & validation
+- `stg_trade_blotter_raw` - Type casting & validation
 
 ### Intermediate Layer (Business Logic)
-- `int_confirmed_trades` — Status filter
-- `int_daily_trade_flows` — Daily aggregates by currency
-- `int_late_arriving_trade_impact` — >3 day latency flagging and late arrival quantification
-- `int_trade_blotter_deduped` — Deduplication by trade_ref
-- `int_nop_integrity_issues` — Day-over-day carry-forward checks
+- `int_confirmed_trades` - Status filter
+- `int_daily_trade_flows` - Daily aggregates by currency
+- `int_late_arriving_trade_impact` - >3 day latency flagging and late arrival quantification
+- `int_trade_blotter_deduped` - Deduplication by trade_ref
+- `int_nop_integrity_issues` - Day-over-day carry-forward checks
 
 ### Marts Layer (Reporting)
-- `mart_computed_nop` — Deterministic NOP series (core model)
-- `mart_nop_reconciliation` — Snapshot vs computed comparison
-- `mart_reconciliation_summary` — Break classification & carry-forward chains
+- `mart_computed_nop` - Deterministic NOP series (core model)
+- `mart_nop_reconciliation` - Snapshot vs computed comparison
+- `mart_reconciliation_summary` - Break classification & carry-forward chains
 
 ---
 

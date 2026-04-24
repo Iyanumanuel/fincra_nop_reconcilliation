@@ -9,3 +9,6 @@ logs/
 *.duckdb
 
 *.txt
+
+*__pycache__/
+/init.py
