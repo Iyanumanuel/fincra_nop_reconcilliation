@@ -1,67 +1,112 @@
+{{ config(materialized='table') }}
 
-
-WITH base AS (
+WITH calendar AS (
     SELECT
-        m.snapshot_date,
-        m.currency,
-        s.is_trading_day,
+        snapshot_date,
+        currency,
+        is_trading_day
+    FROM {{ ref('stg_daily_nop_snapshot') }}
+),
+
+flows AS (
+    SELECT
+        trade_date AS snapshot_date,
+        currency,
+        net_buys_usd,
+        net_sells_usd,
+        confirmed_trade_count
+    FROM {{ ref('int_daily_trade_flows') }}
+),
+
+joined AS (
+    SELECT
+        c.snapshot_date,
+        c.currency,
+        c.is_trading_day,
         COALESCE(f.net_buys_usd, 0) AS net_buys_usd,
         COALESCE(f.net_sells_usd, 0) AS net_sells_usd,
-        f.confirmed_trade_count
-    FROM {{ ref('int_calendar_currency_matrix') }} m
-    LEFT JOIN {{ ref('int_daily_trade_flows') }} f
-      ON m.snapshot_date = f.trade_date
-     AND m.currency = f.currency
-    LEFT JOIN {{ source('raw', 'daily_nop_snapshot') }} s
-      ON m.snapshot_date = s.snapshot_date
-     AND m.currency = s.currency
+        COALESCE(f.confirmed_trade_count, 0) AS confirmed_trade_count
+    FROM calendar c
+    LEFT JOIN flows f
+      ON c.snapshot_date = f.snapshot_date
+     AND c.currency = f.currency
 ),
 
 with_opening AS (
     SELECT
-        b.*,
+        j.*,
         CASE
-            WHEN b.snapshot_date = (SELECT MIN(snapshot_date) FROM base)
+            WHEN j.snapshot_date = (
+                SELECT MIN(snapshot_date)
+                FROM calendar c2
+                WHERE c2.currency = j.currency
+            )
             THEN (
                 SELECT opening_position_usd
-                FROM {{ source('raw', 'daily_nop_snapshot') }} s
-                WHERE s.snapshot_date = b.snapshot_date
-                  AND s.currency = b.currency
+                FROM {{ ref('stg_daily_nop_snapshot') }} s
+                WHERE s.snapshot_date = j.snapshot_date
+                  AND s.currency = j.currency
             )
+            ELSE NULL
         END AS opening_position_usd
-        ,NULL AS closing_position_usd
-    FROM base b
+    FROM joined j
 ),
 
 ordered AS (
     SELECT
         *,
-        LAG(closing_position_usd) OVER (
+        LAG(opening_position_usd) OVER (
             PARTITION BY currency ORDER BY snapshot_date
-        ) AS prev_closing
+        ) AS prev_opening,
+        LAG(net_buys_usd) OVER (
+            PARTITION BY currency ORDER BY snapshot_date
+        ) AS prev_buys,
+        LAG(net_sells_usd) OVER (
+            PARTITION BY currency ORDER BY snapshot_date
+        ) AS prev_sells
     FROM with_opening
+),
+
+opening_filled AS (
+    SELECT
+        snapshot_date,
+        currency,
+        is_trading_day,
+        net_buys_usd,
+        net_sells_usd,
+        confirmed_trade_count,
+
+        CASE
+            WHEN opening_position_usd IS NOT NULL THEN opening_position_usd
+            ELSE (
+                -- previous closing = previous opening + previous flows
+                prev_opening
+                + COALESCE(prev_buys, 0)
+                - COALESCE(prev_sells, 0)
+            )
+        END AS opening_position_usd
+    FROM ordered
+),
+
+final AS (
+    SELECT
+        snapshot_date,
+        currency,
+        round(opening_position_usd,2) AS opening_position_usd,
+        round(net_buys_usd,2) AS net_buys_usd,
+        round(net_sells_usd,2) AS net_sells_usd,
+
+        CASE
+            WHEN is_trading_day IS TRUE THEN
+                round(opening_position_usd + net_buys_usd - net_sells_usd,2)
+            ELSE
+                round(opening_position_usd,2)  -- weekend carry-forward
+        END AS closing_position_usd,
+
+        confirmed_trade_count
+    FROM opening_filled
 )
 
-SELECT
-    snapshot_date,
-    currency,
-    CASE
-        WHEN opening_position_usd IS NOT NULL THEN opening_position_usd
-        ELSE prev_closing
-    END AS opening_position_usd,
-    CASE
-        WHEN is_trading_day THEN net_buys_usd ELSE 0 END AS net_buys_usd,
-    CASE
-        WHEN is_trading_day THEN net_sells_usd ELSE 0 END AS net_sells_usd,
-    CASE
-        WHEN is_trading_day
-        THEN (
-            COALESCE(opening_position_usd, prev_closing)
-            + net_buys_usd
-            - net_sells_usd
-        )
-        ELSE prev_closing
-    END AS closing_position_usd,
-    confirmed_trade_count
-FROM ordered
+SELECT *
+FROM final
 ORDER BY currency, snapshot_date

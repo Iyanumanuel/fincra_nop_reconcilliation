@@ -5,3 +5,7 @@ logs/
 
 .venv
 *.ipynb
+
+*.duckdb
+
+*.txt

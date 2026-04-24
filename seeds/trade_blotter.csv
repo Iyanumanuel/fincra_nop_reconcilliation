@@ -1,5 +1,4 @@
 trade_ref,trade_date,value_date,currency,side,amount_local,rate,usd_equivalent,counterparty,trader,status,notes,ingested_at
-TRD-2023-000096,2023-01-06,2023-01-09,TZS,SELL,7029483600,2343.1612,3000000.0,Ecobank,Seun Babatunde,confirmed,,2023-01-06 10:42:05
 TRD-2023-000005,2023-01-02,2023-01-04,GHS,SELL,191200,10.62,18003.77,Ecobank,Ife Adeyemi,confirmed,,2023-01-02 11:28:37
 TRD-2023-000007,2023-01-02,2023-01-04,KES,SELL,9836000,125.3,78499.6,Stanbic Bank,Chidi Eze,confirmed,,2023-01-02 09:05:24
 TRD-2023-000006,2023-01-02,2023-01-04,KES,BUY,50621200,125.3,404000.0,GTBank,Kemi Okonkwo,confirmed,,2023-01-02 14:21:17

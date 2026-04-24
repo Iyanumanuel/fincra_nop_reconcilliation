@@ -1,0 +1,4 @@
+dbt
+dbt-duckdb
+duckdb
+pandas

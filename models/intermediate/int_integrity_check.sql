@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 SELECT
-    c1.snapshot_date AS day_n,
+    c1.snapshot_date AS date,
     c1.currency,
     c1.opening_position_usd AS opening_today,
     c0.closing_position_usd AS closing_yesterday,

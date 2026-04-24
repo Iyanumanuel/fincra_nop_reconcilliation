@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: int_trade_blotter_deduped
+    description: >
+      Deduplicated trade blotter. When multiple versions of the same trade_ref exist, retains only the record with the latest ingested_at timestamp. This ensures downstream models operate on the final, authoritative version of each trade.
+    columns:
+      - name: trade_ref
+        tests:
+          - unique
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['confirmed', 'pending', 'reversed']
+
+  - name: int_confirmed_trades
+    description: >
+      Incremental model containing only confirmed trades. Implements a 3-day lookback window on ingested_at to capture late-arriving confirmations. Serves as the clean, authoritative fact table for all downstream NOP logic.
+    columns:
+      - name: status
+        description: "Trade status. Only 'CONFIRMED' trades are included in this model."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['confirmed']
+      - name: trade_ref
+        tests: 
+          - unique
+          - not_null
+
+      - name: trade_date
+        tests: 
+          - not_null
+
+  - name: int_daily_trade_flows
+    description: >
+      Aggregates confirmed trades into daily net buys, net sells, and trade countsper currency. This is the foundation for deterministic NOP computation.
+    columns:
+      - name: trade_date
+        tests: 
+          - not_null
+
+
+  - name: int_late_arriving_trades
+    description: >
+      Identifies trades where ingested_at occurs more than 3 days after trade_date. These represent late-arriving confirmations that a naive ingestion pipeline would miss, and are used to quantify NOP misstatement risk.
+    columns:
+      - name: days_late
+        description: "Number of days between trade_date and ingested_at."
+        tests: 
+          - not_null
+
+  - name: int_integrity_check
+    description: >
+      Captures data integrity issues where opening_position[Day N] does not equal closing_position[Day N-1]. This view is used to validate the core assumption of our carry-forward logic and identify any break events that require investigation.
