@@ -175,7 +175,7 @@ See [docs/IMPLEMENTATION_GUIDE.md#key-findings--insights](docs/IMPLEMENTATION_GU
 
 ## 🏢 Production Deployment
 
-For GCP deployment, see [docs/IMPLEMENTATION_GUIDE.md#part-4--production-ready-architecture](docs/IMPLEMENTATION_GUIDE.md#part-4--production-ready-architecture) for:
+For GCP deployment, see [docs/IMPLEMENTATION_GUIDE.md##part-4--production-ready-architecture](docs/IMPLEMENTATION_GUIDE.md#part-4--production-ready-architecture) for:
 - Dataflow + Pub/Sub streaming architecture
 - BigQuery integration
 - Cloud Run alerting deployment
