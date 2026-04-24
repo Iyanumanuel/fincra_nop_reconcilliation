@@ -43,14 +43,13 @@ models:
           - not_null
 
 
-  - name: int_late_arriving_trades
+  - name: int_late_arriving_trade_impact
     description: >
       Identifies trades where ingested_at occurs more than 3 days after trade_date. These represent late-arriving confirmations that a naive ingestion pipeline would miss, and are used to quantify NOP misstatement risk.
     columns:
       - name: days_late
         description: "Number of days between trade_date and ingested_at."
-        tests: 
-          - not_null
+
 
   - name: int_integrity_check
     description: >

@@ -19,6 +19,6 @@ models:
         tests: 
         - not_null
 
-  - name: reconciliation_summary
+  - name: mart_reconciliation_summary
     description: >
       Summarizes each break event with expected vs actual NOP, divergence amount, and the number of subsequent days affected by the carry-forward chain.
