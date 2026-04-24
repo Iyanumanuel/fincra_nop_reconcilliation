@@ -51,3 +51,7 @@ models:
         description: "Number of days between trade_date and ingested_at."
         tests: 
           - not_null
+
+  - name: int_integrity_check
+    description: >
+      Captures data integrity issues where opening_position[Day N] does not equal closing_position[Day N-1]. This view is used to validate the core assumption of our carry-forward logic and identify any break events that require investigation.

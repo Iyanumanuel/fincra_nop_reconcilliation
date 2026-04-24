@@ -29,7 +29,7 @@ filtered AS (
     {% if is_incremental() %}
       WHERE ingested_at >= (
           SELECT
-              MAX(ingested_at) - INTERVAL '3 day'
+              MAX(ingested_at) - INTERVAL '7 day'
           FROM {{ this }}
       )
     {% endif %}

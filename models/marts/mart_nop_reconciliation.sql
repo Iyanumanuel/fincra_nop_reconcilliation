@@ -1,11 +1,7 @@
 {{ config(materialized='table') }}
 
-WITH computed AS (
-    SELECT *
-    FROM {{ ref('mart_computed_nop') }}
-),
 
-snapshot AS (
+WITH snapshot AS (
     SELECT
         snapshot_date,
         currency,
@@ -28,7 +24,7 @@ joined AS (
         s.snapshot_net_sells,
         c.closing_position_usd AS computed_closing,
         s.snapshot_closing
-    FROM computed c
+    FROM {{ ref('mart_computed_nop') }} c
     LEFT JOIN snapshot s
       ON c.snapshot_date = s.snapshot_date
      AND c.currency = s.currency
@@ -51,12 +47,18 @@ snapshot_breaks AS (
             WHEN computed_opening != snapshot_opening
              AND (computed_net_buys != snapshot_net_buys
                OR computed_net_sells != snapshot_net_sells)
-                THEN 'snapshot_opening_and_flows'
-            WHEN computed_opening != snapshot_opening
-                THEN 'snapshot_opening_only'
+                THEN 'opening_and_flows_break'
+            WHEN computed_closing != snapshot_closing
+             AND (computed_net_buys != snapshot_net_buys
+               OR computed_net_sells != snapshot_net_sells)
+                THEN 'closing_and_flows_break'
             WHEN computed_net_buys != snapshot_net_buys
               OR computed_net_sells != snapshot_net_sells
-                THEN 'snapshot_flows_only'
+                THEN 'flows_break'
+            WHEN computed_opening != snapshot_opening
+                THEN 'opening_break'
+            WHEN computed_closing != snapshot_closing
+                THEN 'closing_break'
             ELSE 'snapshot_unknown'
         END AS break_type
     FROM joined
@@ -79,7 +81,7 @@ integrity_breaks AS (
             PARTITION BY c.currency ORDER BY c.snapshot_date
         )) AS divergence_usd,
         'integrity_chain_break' AS break_type
-    FROM computed c
+    FROM {{ ref('mart_computed_nop') }} c
 ),
 
 integrity_filtered AS (

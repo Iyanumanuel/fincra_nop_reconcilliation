@@ -26,7 +26,8 @@ impact AS (
         SUM(
             CASE WHEN side = 'BUY' THEN usd_equivalent ELSE -usd_equivalent END
         ) AS net_nop_impact_usd,
-        COUNT(*) AS late_trade_count
+        COUNT(*) AS late_trade_count,
+        DATE(ingested_at) - DATE(trade_date) AS days_late
     FROM late_trades
     GROUP BY all
 )

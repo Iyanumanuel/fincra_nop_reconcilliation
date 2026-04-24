@@ -11,3 +11,4 @@ conn.execute("CREATE TABLE IF NOT EXISTS main.trade_blotter AS SELECT * FROM tra
 conn.execute("CREATE TABLE IF NOT EXISTS main.daily_nop_snapshot AS SELECT * FROM nop_df")
 
 print("Tables loaded successfully")
+
