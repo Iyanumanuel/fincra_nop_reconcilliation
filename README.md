@@ -1,5 +1,7 @@
 # SDE Assignment - Iyannuloluwa Emmnauel
 
+# Video Walkthrough
+[Video Walkthrough](https://www.loom.com/share/336b8f11ad7344b083417f2d65fcdf0f)
 
 ## 📋 Overview
 
