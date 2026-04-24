@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: mart_computed_nop
+    description: >
+      Deterministic NOP computation per currency per day. Applies correct carry-forward logic for non-trading days, uses confirmed trade flows, and enforces opening = previous closing unless overridden by Day 1 seed.
+    columns:
+      - name: closing_position_usd
+        description: "Computed end-of-day NOP in USD terms."
+        # tests:
+        # - not_null
+
+  - name: mart_nop_reconciliation
+    description: >
+      Compares computed NOP against the official daily_nop_snapshot. Surfaces divergences and classifies them as opening-only, flows-only, or both.
+    columns:
+      - name: divergence_usd
+        description: "Difference between computed and snapshot closing positions."
+        tests: 
+        - not_null
+
+  - name: reconciliation_summary
+    description: >
+      Summarizes each break event with expected vs actual NOP, divergence amount, and the number of subsequent days affected by the carry-forward chain.

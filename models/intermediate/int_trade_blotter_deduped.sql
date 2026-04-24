@@ -26,4 +26,5 @@ SELECT
     ingested_at
 FROM ranked
 WHERE rn = 1
+AND status IS NOT NULL
 

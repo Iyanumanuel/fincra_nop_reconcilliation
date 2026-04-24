@@ -40,4 +40,6 @@ models:
       +materialized: view
     intermediate:
       +materialized: table
+    marts:
+      +materialized: table
 
